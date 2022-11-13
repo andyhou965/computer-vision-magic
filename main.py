@@ -6,9 +6,9 @@ import numpy as np
 # Encode faces from a folder
 sfr = SimpleFacerec()
 sfr.load_encoding_images("known-faces/")
-name_board = cv2.imread('images/name_board.png')
-size = 300
-name_board = cv2.resize(name_board, (size, size))
+name_board = cv2.imread('images/name_board01.png')
+board_size = (626, 391)
+name_board = cv2.resize(name_board, board_size)
 
 # Create a mask of logo
 img2gray = cv2.cvtColor(name_board, cv2.COLOR_BGR2GRAY)
@@ -98,7 +98,7 @@ while video.isOpened():
             bias = (x2 - x1) // 8
             frame_row = y1
             frame_col = x1 - bias
-            roi = frame[frame_row : frame_row + size, frame_col - size : frame_col]
+            roi = frame[frame_row : frame_row + board_size[1], frame_col - board_size[0] : frame_col]
             roi[np.where(mask)] = 0
             roi += name_board
         except:
