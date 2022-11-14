@@ -1,0 +1,1 @@
+pyinstaller main.py --noconsole --add-data ./images:images --add-data ./known-faces:known-faces --name cv-app

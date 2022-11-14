@@ -54,13 +54,6 @@ board_img = os.path.join(absolute_path, "images/name_board01.png")
 # Encode faces from a folder
 sfr = SimpleFacerec()
 sfr.load_encoding_images(known_faces_folder)
-name_board = cv2.imread(board_img)
-board_size = (496, 275)
-name_board = cv2.resize(name_board, board_size)
-
-# Create a mask of logo
-img2gray = cv2.cvtColor(name_board, cv2.COLOR_BGR2GRAY)
-ret, mask = cv2.threshold(img2gray, 1, 255, cv2.THRESH_BINARY)
 
 # Detect the hands
 mpHands = mp.solutions.hands
@@ -89,6 +82,10 @@ img_light = cv2.imread(os.path.join(absolute_path, 'images/starts_02.png'), -1)
 
 deg = 0
 
+
+name_board = cv2.VideoCapture("images/gif-test-unscreen.gif")
+board_size = (360, 360)
+
 while video.isOpened():
     video.set(cv2.CAP_PROP_FPS, 60)
     ret, frame = video.read()
@@ -105,12 +102,23 @@ while video.isOpened():
             bias = (x2 - x1) // 8
             frame_row = y1
             frame_col = x1 - bias
-            roi = frame[
-                frame_row : frame_row + board_size[1],
-                frame_col - board_size[0] : frame_col,
-            ]
-            roi[np.where(mask)] = 0
-            roi += name_board
+
+            nb_ret, nb_frame = name_board.read()
+            if not nb_ret:
+                name_board.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                continue
+            else:
+                nb_frame = cv2.resize(nb_frame, board_size)
+
+                # Create a mask of logo
+                img2gray = cv2.cvtColor(nb_frame, cv2.COLOR_BGR2GRAY)
+                _, mask = cv2.threshold(img2gray, 1, 255, cv2.THRESH_BINARY)
+                roi = frame[
+                    frame_row : frame_row + board_size[1],
+                    frame_col - board_size[0] : frame_col,
+                ]
+                roi[np.where(mask)] = 0
+                roi += nb_frame
         except:
             continue
 
