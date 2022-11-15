@@ -49,18 +49,14 @@ def transparent(targetImg, x, y, size=None):
 
 absolute_path = os.path.dirname(__file__)
 known_faces_folder = os.path.join(absolute_path, "known-faces/")
-board_img = os.path.join(absolute_path, "images/name_board01.png")
+board_img = os.path.join(absolute_path, "images/name_board.png")
 
 # Encode faces from a folder
 sfr = SimpleFacerec()
 sfr.load_encoding_images(known_faces_folder)
-name_board = cv2.imread(board_img)
-board_size = (496, 275)
+name_board = cv2.imread(board_img, -1)
+board_size = (917 // 2, 508 // 2)
 name_board = cv2.resize(name_board, board_size)
-
-# Create a mask of logo
-img2gray = cv2.cvtColor(name_board, cv2.COLOR_BGR2GRAY)
-ret, mask = cv2.threshold(img2gray, 1, 255, cv2.THRESH_BINARY)
 
 # Detect the hands
 mpHands = mp.solutions.hands
@@ -94,7 +90,7 @@ while video.isOpened():
     ret, frame = video.read()
     # frame = cv2.resize(frame, frame_res)
     frame = cv2.flip(frame, 1)
-    rgbimg = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
     # Detect Faces
     face_locations, face_names = sfr.detect_known_faces(frame)
     for face_loc, name in zip(face_locations, face_names):
@@ -105,16 +101,32 @@ while video.isOpened():
             bias = (x2 - x1) // 8
             frame_row = y1
             frame_col = x1 - bias
+
+            # make the name board transparent
+            b, g, r, a = cv2.split(name_board)
+            overlay_color = cv2.merge((b, g, r))
+            mask = cv2.medianBlur(a, 1)
+            h, w, _ = overlay_color.shape
             roi = frame[
                 frame_row : frame_row + board_size[1],
                 frame_col - board_size[0] : frame_col,
             ]
-            roi[np.where(mask)] = 0
-            roi += name_board
+
+            img1_bg = cv2.bitwise_and(
+                roi.copy(), roi.copy(), mask=cv2.bitwise_not(mask)
+            )
+            img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
+
+            frame[
+                frame_row : frame_row + board_size[1],
+                frame_col - board_size[0] : frame_col,
+            ] = cv2.add(img1_bg, img2_fg)
+
         except:
             continue
 
     # Detect the Hands
+    rgbimg = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands.process(rgbimg)
 
     # if result.multi_hand_landmarks and len(result.multi_hand_landmarks) >= 2:
