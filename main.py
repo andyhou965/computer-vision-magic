@@ -47,7 +47,7 @@ def transparent(targetImg, x, y, size=None):
     return newFrame
 
 
-absolute_path = os.path.dirname(__file__)
+absolute_path = os.path.dirname(os.path.abspath(__file__))
 known_faces_folder = os.path.join(absolute_path, "known-faces/")
 board_img = os.path.join(absolute_path, "images/name_board.png")
 
