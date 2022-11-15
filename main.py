@@ -3,7 +3,7 @@ import mediapipe as mp
 from simple_facerec import SimpleFacerec
 import numpy as np
 import os
-from play_video import *
+from play_video2 import *
 
 
 def position_data(lmlist):
