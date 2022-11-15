@@ -81,7 +81,7 @@ cv2.resizeWindow(window_name, window_width, window_height)
 
 img_1 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_outside.png'), -1)
 img_2 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_inside.png'), -1)
-img_light = cv2.imread(os.path.join(absolute_path, 'images/starts_02.png'), -1)
+# img_light = cv2.imread(os.path.join(absolute_path, 'images/starts_02.png'), -1)
 
 deg = 0
 
