@@ -3,6 +3,7 @@ import mediapipe as mp
 from simple_facerec import SimpleFacerec
 import numpy as np
 import os
+from play_video import *
 
 
 def position_data(lmlist):
@@ -129,8 +130,9 @@ while video.isOpened():
     rgbimg = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands.process(rgbimg)
 
-    # if result.multi_hand_landmarks and len(result.multi_hand_landmarks) >= 2:
-    if result.multi_hand_landmarks:
+    if result.multi_hand_landmarks and len(result.multi_hand_landmarks) >= 2:
+        # if result.multi_hand_landmarks:
+        open_hand_num = 0
         for hand in result.multi_hand_landmarks:
             lmList = []
             for id, lm in enumerate(hand.landmark):
@@ -157,6 +159,7 @@ while video.isOpened():
             #     draw_line(thumb_tip, ring_tip)
             #     draw_line(thumb_tip, pinky_tip)
             if ratio > 1.2:
+                open_hand_num += 1
                 centerx = midle_mcp[0]
                 centery = midle_mcp[1]
                 shield_size = 3.0
@@ -190,6 +193,8 @@ while video.isOpened():
                 if diameter != 0:
                     frame = transparent(rotated1, x1, y1, shield_size)
                     frame = transparent(rotated2, x1, y1, shield_size)
+        if open_hand_num > 2:
+            break
 
     # print(result)
     cv2.imshow(window_name, frame)
@@ -199,3 +204,8 @@ while video.isOpened():
 
 video.release()
 cv2.destroyAllWindows()
+
+app = QApplication(sys.argv)
+window = Window()
+window.show()
+sys.exit(app.exec_())

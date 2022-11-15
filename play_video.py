@@ -34,8 +34,13 @@ class Window(QMainWindow):
         self.setCentralWidget(self.videoWidget)
         self.mediaPlayer.setVideoOutput(self.videoWidget)
 
+        self.mediaPlayer.mediaStatusChanged.connect(self.media_status)
         # Play
         self.mediaPlayer.play()
+
+    def media_status(self, status):  # <---
+        if status == 7:
+            print("The End!")
 
 
 if __name__ == '__main__':
