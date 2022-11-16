@@ -210,14 +210,14 @@ while video.isOpened():
                 if diameter != 0:
                     frame = transparent(rotated1, x1, y1, shield_size)
                     frame = transparent(rotated2, x1, y1, shield_size)
-        if open_hand_num >= 8:
+        if open_hand_num >= 2:
             flash_flag = True
 
     if flash_flag:
         cover_frame = frame.copy()
-        cover_frame[:, :] = 0
+        cover_frame[:, :] = 255
         frame = cv2.addWeighted(frame, (1 - flash_rate), cover_frame, flash_rate, 0.0)
-        flash_rate = flash_rate + 0.1
+        flash_rate = flash_rate + 0.03
 
     # print(result)
     cv2.imshow(window_name, frame)
@@ -228,7 +228,7 @@ while video.isOpened():
 video.release()
 cv2.destroyAllWindows()
 
-# app = QApplication(sys.argv)
-# window = Window()
-# window.show()
-# sys.exit(app.exec_())
+app = QApplication(sys.argv)
+window = Window()
+window.show()
+sys.exit(app.exec_())

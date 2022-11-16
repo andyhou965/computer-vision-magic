@@ -11,7 +11,7 @@ class SimpleFacerec:
         self.known_face_names = []
 
         # Resize frame for a faster speed
-        self.frame_resizing = 0.2
+        self.frame_resizing = 0.3
 
     def load_encoding_images(self, images_path):
         """
@@ -56,7 +56,7 @@ class SimpleFacerec:
         for face_encoding in face_encodings:
             # See if the face is a match for the known face(s)
             matches = face_recognition.compare_faces(
-                self.known_face_encodings, face_encoding, 0.35
+                self.known_face_encodings, face_encoding, 0.5
             )
             name = "Unknown"
 
