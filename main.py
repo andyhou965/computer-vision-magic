@@ -3,7 +3,7 @@ import mediapipe as mp
 from simple_facerec import SimpleFacerec
 import numpy as np
 import os
-from play_video2 import *
+from play_video import *
 
 
 def position_data(lmlist):
@@ -49,15 +49,11 @@ def transparent(targetImg, x, y, size=None):
 
 
 absolute_path = os.path.dirname(os.path.abspath(__file__))
-known_faces_folder = os.path.join(absolute_path, "known-faces/")
-board_img = os.path.join(absolute_path, "images/name_board.png")
 
 # Encode faces from a folder
+known_faces_folder = os.path.join(absolute_path, "known-faces/")
 sfr = SimpleFacerec()
 sfr.load_encoding_images(known_faces_folder)
-name_board = cv2.imread(board_img, -1)
-board_size = (917 // 2, 508 // 2)
-name_board = cv2.resize(name_board, board_size)
 
 # Detect the hands
 mpHands = mp.solutions.hands
@@ -86,6 +82,20 @@ img_2 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_inside.png')
 
 deg = 0
 
+flash_flag = False
+flash_rate = 0.1
+
+name_list = [
+    "Junjie Hou",
+    "Ali Nimer",
+    "Ibrahim Al Mannaee",
+    "Marcelo Kekligian",
+    "Mason Xu",
+    "Jin Xu",
+    "Yukai Bi",
+    "Anqi Chen",
+]
+
 while video.isOpened():
     video.set(cv2.CAP_PROP_FPS, 60)
     ret, frame = video.read()
@@ -95,6 +105,13 @@ while video.isOpened():
     # Detect Faces
     face_locations, face_names = sfr.detect_known_faces(frame)
     for face_loc, name in zip(face_locations, face_names):
+        if name not in name_list:
+            continue
+        name_card = os.path.join(absolute_path, "name-cards/%s.png" % (name))
+        name_board = cv2.imread(name_card, -1)
+        height, width = name_board.shape[0], name_board.shape[1]
+        board_size = (width // 2, height // 2)
+        name_board = cv2.resize(name_board, board_size)
         try:
             y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
             # cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
@@ -130,8 +147,8 @@ while video.isOpened():
     rgbimg = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands.process(rgbimg)
 
-    if result.multi_hand_landmarks and len(result.multi_hand_landmarks) >= 2:
-        # if result.multi_hand_landmarks:
+    # if result.multi_hand_landmarks and len(result.multi_hand_landmarks) >= 2:
+    if result.multi_hand_landmarks:
         open_hand_num = 0
         for hand in result.multi_hand_landmarks:
             lmList = []
@@ -193,19 +210,25 @@ while video.isOpened():
                 if diameter != 0:
                     frame = transparent(rotated1, x1, y1, shield_size)
                     frame = transparent(rotated2, x1, y1, shield_size)
-        if open_hand_num > 2:
-            break
+        if open_hand_num >= 8:
+            flash_flag = True
+
+    if flash_flag:
+        cover_frame = frame.copy()
+        cover_frame[:, :] = 0
+        frame = cv2.addWeighted(frame, (1 - flash_rate), cover_frame, flash_rate, 0.0)
+        flash_rate = flash_rate + 0.1
 
     # print(result)
     cv2.imshow(window_name, frame)
     key = cv2.waitKey(1)
-    if key == ord('q') or key == 27:
+    if key == ord('q') or key == 27 or flash_rate >= 1:
         break
 
 video.release()
 cv2.destroyAllWindows()
 
-app = QApplication(sys.argv)
-window = Window()
-window.show()
-sys.exit(app.exec_())
+# app = QApplication(sys.argv)
+# window = Window()
+# window.show()
+# sys.exit(app.exec_())

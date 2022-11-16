@@ -1,5 +1,7 @@
 .DS_Store
 test*.py
+known-faces/
+name-cards/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
