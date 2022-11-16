@@ -17,7 +17,11 @@ name_list = [
 ]
 
 open_hand_limit = 2
-ratio_limit = 2.2
+ratio_limit = 2.15
+
+flash_flag = False
+flash_rate = 0.0
+rate_increment = 0.06
 
 
 def position_data(lmlist):
@@ -97,9 +101,6 @@ img_2 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_inside.png')
 # img_light = cv2.imread(os.path.join(absolute_path, 'images/starts_02.png'), -1)
 
 deg = 0
-
-flash_flag = False
-flash_rate = 0.1
 
 while video.isOpened():
     video.set(cv2.CAP_PROP_FPS, 60)
@@ -230,7 +231,7 @@ while video.isOpened():
             frame = cv2.addWeighted(
                 frame, (1 - flash_rate), cover_frame, flash_rate, 0.0
             )
-            flash_rate = flash_rate + 0.04
+            flash_rate = flash_rate + rate_increment
 
     # print(result)
     cv2.imshow(window_name, frame)
@@ -241,7 +242,7 @@ while video.isOpened():
 video.release()
 cv2.destroyAllWindows()
 
-# app = QApplication(sys.argv)
-# window = Window()
-# window.show()
-# sys.exit(app.exec_())
+app = QApplication(sys.argv)
+window = Window()
+window.show()
+sys.exit(app.exec_())
