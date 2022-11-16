@@ -17,7 +17,7 @@ from PyQt5.QtCore import Qt, QUrl
 import os
 
 absolute_path = os.path.dirname(os.path.abspath(__file__))
-video_path = os.path.join(absolute_path, "videos/countdown.mp4")
+video_path = os.path.join(absolute_path, "videos/launch_video.mp4")
 
 
 class Window(QWidget):
