@@ -1,7 +1,6 @@
 import cv2
 import mediapipe as mp
 from simple_facerec import SimpleFacerec
-import numpy as np
 import os
 from play_video import *
 
@@ -15,11 +14,11 @@ name_list = [
     "Yukai Bi",
     "Anqi Chen",
 ]
+authrized_faces_num = 1
 
 open_hand_limit = 2
 ratio_limit = 2.15
 
-flash_flag = False
 flash_rate = 0.0
 rate_increment = 0.06
 
@@ -98,7 +97,6 @@ cv2.resizeWindow(window_name, window_width, window_height)
 
 img_1 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_outside.png'), -1)
 img_2 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_inside.png'), -1)
-# img_light = cv2.imread(os.path.join(absolute_path, 'images/starts_02.png'), -1)
 
 deg = 0
 
@@ -112,7 +110,7 @@ while video.isOpened():
     # Detect Faces
     face_locations, face_names = sfr.detect_known_faces(frame)
     authrized_faces = [name for name in name_list if name in face_names]
-    if len(authrized_faces) >= 2:
+    if len(authrized_faces) >= authrized_faces_num:
         show_hand_magic = True
 
     for face_loc, name in zip(face_locations, face_names):
@@ -158,9 +156,9 @@ while video.isOpened():
     rgbimg = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands.process(rgbimg)
 
-    if result.multi_hand_landmarks:
-        # if result.multi_hand_landmarks and show_hand_magic:
-        open_hand_num = 0
+    open_hand_num = 0
+    # if result.multi_hand_landmarks:
+    if result.multi_hand_landmarks and show_hand_magic:
         for hand in result.multi_hand_landmarks:
             lmList = []
             for id, lm in enumerate(hand.landmark):
@@ -221,17 +219,12 @@ while video.isOpened():
                 if diameter != 0:
                     frame = transparent(rotated1, x1, y1, shield_size)
                     frame = transparent(rotated2, x1, y1, shield_size)
-        if open_hand_num >= open_hand_limit:
-            flash_flag = True
 
-    if flash_flag:
-        if open_hand_num >= open_hand_limit:
-            cover_frame = frame.copy()
-            cover_frame[:, :] = 255
-            frame = cv2.addWeighted(
-                frame, (1 - flash_rate), cover_frame, flash_rate, 0.0
-            )
-            flash_rate = flash_rate + rate_increment
+    if open_hand_num >= open_hand_limit:
+        cover_frame = frame.copy()
+        cover_frame[:, :] = 255
+        frame = cv2.addWeighted(frame, (1 - flash_rate), cover_frame, flash_rate, 0.0)
+        flash_rate = flash_rate + rate_increment
 
     # print(result)
     cv2.imshow(window_name, frame)
