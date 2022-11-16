@@ -1,10 +1,11 @@
 import sys
+import os
+
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import os
 
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 video_path = os.path.join(absolute_path, "videos/countdown.mp4")
@@ -41,6 +42,7 @@ class Window(QMainWindow):
     def media_status(self, status):  # <---
         if status == 7:
             print("The End!")
+            self.close()
 
 
 if __name__ == '__main__':

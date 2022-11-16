@@ -175,7 +175,7 @@ while video.isOpened():
             #     draw_line(thumb_tip, midle_tip)
             #     draw_line(thumb_tip, ring_tip)
             #     draw_line(thumb_tip, pinky_tip)
-            if ratio > 1.2:
+            if ratio >= 1.3:
                 open_hand_num += 1
                 centerx = midle_mcp[0]
                 centery = midle_mcp[1]
@@ -217,7 +217,7 @@ while video.isOpened():
         cover_frame = frame.copy()
         cover_frame[:, :] = 255
         frame = cv2.addWeighted(frame, (1 - flash_rate), cover_frame, flash_rate, 0.0)
-        flash_rate = flash_rate + 0.03
+        flash_rate = flash_rate + 0.04
 
     # print(result)
     cv2.imshow(window_name, frame)

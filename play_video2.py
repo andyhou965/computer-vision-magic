@@ -31,9 +31,7 @@ class Window(QWidget):
         p = self.palette()
         p.setColor(QPalette.Window, Qt.black)
         self.setPalette(p)
-
         self.init_ui()
-
         self.show()
 
     def init_ui(self):
