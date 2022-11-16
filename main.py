@@ -5,6 +5,20 @@ import numpy as np
 import os
 from play_video import *
 
+name_list = [
+    "Junjie Hou",
+    "Ali Nimer",
+    "Ibrahim Al Mannaee",
+    "Marcelo Kekligian",
+    "Mason Xu",
+    "Jin Xu",
+    "Yukai Bi",
+    "Anqi Chen",
+]
+
+open_hand_limit = 2
+ratio_limit = 2.2
+
 
 def position_data(lmlist):
     global wrist, thumb_tip, index_mcp, index_tip, midle_mcp, midle_tip, ring_mcp, ring_tip, pinky_tip
@@ -57,7 +71,9 @@ sfr.load_encoding_images(known_faces_folder)
 
 # Detect the hands
 mpHands = mp.solutions.hands
-hands = mpHands.Hands(max_num_hands=8)
+hands = mpHands.Hands(
+    max_num_hands=8, min_detection_confidence=0.75, min_tracking_confidence=0.75
+)
 mpDraw = mp.solutions.drawing_utils
 
 # Load Camera and set the size of window
@@ -85,25 +101,19 @@ deg = 0
 flash_flag = False
 flash_rate = 0.1
 
-name_list = [
-    "Junjie Hou",
-    "Ali Nimer",
-    "Ibrahim Al Mannaee",
-    "Marcelo Kekligian",
-    "Mason Xu",
-    "Jin Xu",
-    "Yukai Bi",
-    "Anqi Chen",
-]
-
 while video.isOpened():
     video.set(cv2.CAP_PROP_FPS, 60)
     ret, frame = video.read()
+    show_hand_magic = False
     # frame = cv2.resize(frame, frame_res)
     frame = cv2.flip(frame, 1)
 
     # Detect Faces
     face_locations, face_names = sfr.detect_known_faces(frame)
+    authrized_faces = [name for name in name_list if name in face_names]
+    if len(authrized_faces) >= 2:
+        show_hand_magic = True
+
     for face_loc, name in zip(face_locations, face_names):
         if name not in name_list:
             continue
@@ -147,8 +157,8 @@ while video.isOpened():
     rgbimg = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     result = hands.process(rgbimg)
 
-    # if result.multi_hand_landmarks and len(result.multi_hand_landmarks) >= 2:
     if result.multi_hand_landmarks:
+        # if result.multi_hand_landmarks and show_hand_magic:
         open_hand_num = 0
         for hand in result.multi_hand_landmarks:
             lmList = []
@@ -159,10 +169,10 @@ while video.isOpened():
                 # cv2.circle(frame, (coorx, coory),6,(50,50,255), -1)
             # mpDraw.draw_landmarks(frame, hand, mpHands.HAND_CONNECTIONS)
             position_data(lmList)
-            palm = calculate_distance(wrist, index_mcp)
-            distance = calculate_distance(index_tip, pinky_tip)
-            # palm = calculate_distance(wrist, ring_mcp)
-            # distance = calculate_distance(ring_tip, ring_mcp)
+            # palm = calculate_distance(wrist, index_mcp)
+            # distance = calculate_distance(index_tip, pinky_tip)
+            palm = calculate_distance(wrist, midle_mcp)
+            distance = calculate_distance(thumb_tip, pinky_tip)
             ratio = distance / palm
             # print(ratio)
             # if (0.8 >= ratio > 0.5):
@@ -175,7 +185,7 @@ while video.isOpened():
             #     draw_line(thumb_tip, midle_tip)
             #     draw_line(thumb_tip, ring_tip)
             #     draw_line(thumb_tip, pinky_tip)
-            if ratio >= 1.3:
+            if ratio >= ratio_limit:
                 open_hand_num += 1
                 centerx = midle_mcp[0]
                 centery = midle_mcp[1]
@@ -210,14 +220,17 @@ while video.isOpened():
                 if diameter != 0:
                     frame = transparent(rotated1, x1, y1, shield_size)
                     frame = transparent(rotated2, x1, y1, shield_size)
-        if open_hand_num >= 2:
+        if open_hand_num >= open_hand_limit:
             flash_flag = True
 
     if flash_flag:
-        cover_frame = frame.copy()
-        cover_frame[:, :] = 255
-        frame = cv2.addWeighted(frame, (1 - flash_rate), cover_frame, flash_rate, 0.0)
-        flash_rate = flash_rate + 0.04
+        if open_hand_num >= open_hand_limit:
+            cover_frame = frame.copy()
+            cover_frame[:, :] = 255
+            frame = cv2.addWeighted(
+                frame, (1 - flash_rate), cover_frame, flash_rate, 0.0
+            )
+            flash_rate = flash_rate + 0.04
 
     # print(result)
     cv2.imshow(window_name, frame)
@@ -228,7 +241,7 @@ while video.isOpened():
 video.release()
 cv2.destroyAllWindows()
 
-app = QApplication(sys.argv)
-window = Window()
-window.show()
-sys.exit(app.exec_())
+# app = QApplication(sys.argv)
+# window = Window()
+# window.show()
+# sys.exit(app.exec_())
