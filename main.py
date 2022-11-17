@@ -7,7 +7,7 @@ from utils import *
 
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 
-# Load variables
+######## Load variables ########
 config_file = read_json(os.path.join(absolute_path, "config.json"))
 
 ## limitions
@@ -22,15 +22,47 @@ max_num_hands = config_file["variables"]["max_num_hands"]
 ## Window Name
 window_name = config_file["variables"]["window_name"]
 
-## Screen and Camera Resolutions
-screen_res = config_file["variables"]["screen_res"]
-frame_res = config_file["variables"]["frame_res"]
+## The Camera
+camera = config_file["variables"]["camera"]
 
+######## Screen and Camera Resolutions ########
+screen_res = config_file["variables"]["screen_res"]
+
+# Load Camera and set the size of window
+video = cv2.VideoCapture(camera)
+ret, frame = video.read()
+
+if not ret:
+    print("Error: Cannot access webcam!")
+    video.release()
+    cv2.destroyAllWindows()
+    exit()
+
+frame_height, frame_width, _ = frame.shape
+
+scale_width = screen_res[0] / frame_width
+scale_height = screen_res[1] / frame_height
+scale = min(scale_width, scale_height)
+
+window_width = int(frame_width * scale)
+window_height = int(frame_height * scale)
+
+# cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+# cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+cv2.resizeWindow(window_name, window_width, window_height)
+
+######## Load the images ########
 # Encode faces from a folder
 known_faces_folder = os.path.join(absolute_path, "known-faces/")
 name_list = get_autherized_names(known_faces_folder)
 sfr = SimpleFacerec()
 sfr.load_encoding_images(known_faces_folder)
+
+img_1 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_outside.png'), -1)
+img_2 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_inside.png'), -1)
+
+deg = 0
 
 # Detect the hands
 mpHands = mp.solutions.hands
@@ -40,24 +72,6 @@ hands = mpHands.Hands(
     min_tracking_confidence=0.75,
 )
 mpDraw = mp.solutions.drawing_utils
-
-# Load Camera and set the size of window
-video = cv2.VideoCapture(0)
-scale_width = screen_res[0] / frame_res[1]
-scale_height = screen_res[1] / frame_res[0]
-scale = min(scale_width, scale_height)
-window_width = int(frame_res[1] * scale)
-window_height = int(frame_res[0] * scale)
-
-# cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
-# cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-cv2.resizeWindow(window_name, window_width, window_height)
-
-img_1 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_outside.png'), -1)
-img_2 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_inside.png'), -1)
-
-deg = 0
 
 while video.isOpened():
     video.set(cv2.CAP_PROP_FPS, 60)
@@ -188,8 +202,11 @@ while video.isOpened():
     # print(result)
     cv2.imshow(window_name, frame)
     key = cv2.waitKey(1)
-    if key == ord('q') or key == 27 or flash_rate >= 1:
+    if key & 0xFF == ord('p') or flash_rate >= 1:
         break
+
+    if key == 27:
+        exit()
 
 video.release()
 cv2.destroyAllWindows()
