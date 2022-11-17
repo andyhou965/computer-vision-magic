@@ -10,7 +10,7 @@ import sys
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 
 ######## Load variables ########
-config_file = read_json(os.path.join(absolute_path, "config.json"))
+config_file = read_json(os.path.join(absolute_path, "conf/config.json"))
 
 ## limitions
 authrized_faces_num = config_file["variables"]["authrized_faces_num"]
