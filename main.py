@@ -60,7 +60,7 @@ cv2.resizeWindow(window_name, window_width, window_height)
 
 ######## Load the Images ########
 # Shield related
-shield_size = config_file["images"]["shield_size"]
+shield_size_rate = config_file["images"]["shield_size"]
 shield_inside_image = config_file["images"]["shield_inside_image"]
 shield_outside_image = config_file["images"]["shield_outside_image"]
 
@@ -177,6 +177,7 @@ while video.isOpened():
                 open_hand_num += 1
                 centerx = midle_mcp[0]
                 centery = midle_mcp[1]
+                shield_size = shield_size_rate
                 diameter = round(palm * shield_size)
                 x1 = round(centerx - (diameter / 2))
                 y1 = round(centery - (diameter / 2))
@@ -228,6 +229,7 @@ cv2.destroyAllWindows()
 
 ######## Play Video ########
 video_path = config_file["videos"]["video_path"]
+video_path = os.path.join(absolute_path, video_path)
 have_video_control = config_file["videos"]["have_video_control"]
 video_window_title = config_file["videos"]["video_window_title"]
 
