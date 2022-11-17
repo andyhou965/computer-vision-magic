@@ -3,72 +3,18 @@ import mediapipe as mp
 from simple_facerec import SimpleFacerec
 import os
 from play_video import *
+from utils import *
 
-name_list = [
-    "Junjie Hou",
-    "Ali Nimer",
-    "Ibrahim Al Mannaee",
-    "Marcelo Kekligian",
-    "Mason Xu",
-    "Jin Xu",
-    "Yukai Bi",
-    "Anqi Chen",
-]
+absolute_path = os.path.dirname(os.path.abspath(__file__))
 authrized_faces_num = 1
-
 open_hand_limit = 2
 ratio_limit = 2.15
-
 flash_rate = 0.0
 rate_increment = 0.06
 
-
-def position_data(lmlist):
-    global wrist, thumb_tip, index_mcp, index_tip, midle_mcp, midle_tip, ring_mcp, ring_tip, pinky_tip
-    wrist = (lmlist[0][0], lmlist[0][1])
-    thumb_tip = (lmlist[4][0], lmlist[4][1])
-    index_mcp = (lmlist[5][0], lmlist[5][1])
-    index_tip = (lmlist[8][0], lmlist[8][1])
-    midle_mcp = (lmlist[9][0], lmlist[9][1])
-    midle_tip = (lmlist[12][0], lmlist[12][1])
-    ring_mcp = (lmlist[13][0], lmlist[13][1])
-    ring_tip = (lmlist[16][0], lmlist[16][1])
-    pinky_tip = (lmlist[20][0], lmlist[20][1])
-
-
-def draw_line(p1, p2, size=5):
-    cv2.line(frame, p1, p2, (0, 255, 255), size)
-    cv2.line(frame, p1, p2, (255, 255, 255), round(size / 2))
-
-
-def calculate_distance(p1, p2):
-    x1, y1, x2, y2 = p1[0], p1[1], p2[0], p2[1]
-    lenght = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** (1.0 / 2)
-    return lenght
-
-
-def transparent(targetImg, x, y, size=None):
-    if size is not None:
-        targetImg = cv2.resize(targetImg, size)
-
-    newFrame = frame.copy()
-    b, g, r, a = cv2.split(targetImg)
-    overlay_color = cv2.merge((b, g, r))
-    mask = cv2.medianBlur(a, 1)
-    h, w, _ = overlay_color.shape
-    roi = newFrame[y : y + h, x : x + w]
-
-    img1_bg = cv2.bitwise_and(roi.copy(), roi.copy(), mask=cv2.bitwise_not(mask))
-    img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
-    newFrame[y : y + h, x : x + w] = cv2.add(img1_bg, img2_fg)
-
-    return newFrame
-
-
-absolute_path = os.path.dirname(os.path.abspath(__file__))
-
 # Encode faces from a folder
 known_faces_folder = os.path.join(absolute_path, "known-faces/")
+name_list = get_autherized_names(known_faces_folder)
 sfr = SimpleFacerec()
 sfr.load_encoding_images(known_faces_folder)
 
@@ -167,23 +113,23 @@ while video.isOpened():
                 lmList.append([coorx, coory])
                 # cv2.circle(frame, (coorx, coory),6,(50,50,255), -1)
             # mpDraw.draw_landmarks(frame, hand, mpHands.HAND_CONNECTIONS)
-            position_data(lmList)
+            (
+                wrist,
+                thumb_tip,
+                index_mcp,
+                index_tip,
+                midle_mcp,
+                midle_tip,
+                ring_mcp,
+                ring_tip,
+                pinky_tip,
+            ) = position_data(lmList)
             # palm = calculate_distance(wrist, index_mcp)
             # distance = calculate_distance(index_tip, pinky_tip)
             palm = calculate_distance(wrist, midle_mcp)
             distance = calculate_distance(thumb_tip, pinky_tip)
             ratio = distance / palm
-            # print(ratio)
-            # if (0.8 >= ratio > 0.5):
-            #     draw_line(wrist, thumb_tip)
-            #     draw_line(wrist, index_tip)
-            #     draw_line(wrist, midle_tip)
-            #     draw_line(wrist, ring_tip)
-            #     draw_line(wrist, pinky_tip)
-            #     draw_line(thumb_tip, index_tip)
-            #     draw_line(thumb_tip, midle_tip)
-            #     draw_line(thumb_tip, ring_tip)
-            #     draw_line(thumb_tip, pinky_tip)
+
             if ratio >= ratio_limit:
                 open_hand_num += 1
                 centerx = midle_mcp[0]
@@ -217,8 +163,8 @@ while video.isOpened():
                 rotated1 = cv2.warpAffine(img_1, M1, (wid, hei))
                 rotated2 = cv2.warpAffine(img_2, M2, (wid, hei))
                 if diameter != 0:
-                    frame = transparent(rotated1, x1, y1, shield_size)
-                    frame = transparent(rotated2, x1, y1, shield_size)
+                    frame = transparent(frame, rotated1, x1, y1, shield_size)
+                    frame = transparent(frame, rotated2, x1, y1, shield_size)
 
     if open_hand_num >= open_hand_limit:
         cover_frame = frame.copy()
