@@ -6,11 +6,25 @@ from play_video import *
 from utils import *
 
 absolute_path = os.path.dirname(os.path.abspath(__file__))
-authrized_faces_num = 1
-open_hand_limit = 2
-ratio_limit = 2.15
-flash_rate = 0.0
-rate_increment = 0.06
+
+# Load variables
+config_file = read_json(os.path.join(absolute_path, "config.json"))
+
+## limitions
+authrized_faces_num = config_file["variables"]["authrized_faces_num"]
+open_hand_limit = config_file["variables"]["open_hand_limit"]
+ratio_limit = config_file["variables"]["ratio_limit"]
+flash_rate = config_file["variables"]["flash_rate"]
+rate_increment = config_file["variables"]["rate_increment"]
+flash_color = config_file["variables"]["flash_color"]
+max_num_hands = config_file["variables"]["max_num_hands"]
+
+## Window Name
+window_name = config_file["variables"]["window_name"]
+
+## Screen and Camera Resolutions
+screen_res = config_file["variables"]["screen_res"]
+frame_res = config_file["variables"]["frame_res"]
 
 # Encode faces from a folder
 known_faces_folder = os.path.join(absolute_path, "known-faces/")
@@ -21,21 +35,20 @@ sfr.load_encoding_images(known_faces_folder)
 # Detect the hands
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(
-    max_num_hands=8, min_detection_confidence=0.75, min_tracking_confidence=0.75
+    max_num_hands=max_num_hands,
+    min_detection_confidence=0.75,
+    min_tracking_confidence=0.75,
 )
 mpDraw = mp.solutions.drawing_utils
 
 # Load Camera and set the size of window
 video = cv2.VideoCapture(0)
-screen_res = (4096, 2160)
-frame_res = (1920, 1080)
 scale_width = screen_res[0] / frame_res[1]
 scale_height = screen_res[1] / frame_res[0]
 scale = min(scale_width, scale_height)
 window_width = int(frame_res[1] * scale)
 window_height = int(frame_res[0] * scale)
 
-window_name = "Launch"
 # cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
 # cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
@@ -168,7 +181,7 @@ while video.isOpened():
 
     if open_hand_num >= open_hand_limit:
         cover_frame = frame.copy()
-        cover_frame[:, :] = 255
+        cover_frame[:, :] = flash_color
         frame = cv2.addWeighted(frame, (1 - flash_rate), cover_frame, flash_rate, 0.0)
         flash_rate = flash_rate + rate_increment
 

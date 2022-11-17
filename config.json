@@ -1,0 +1,14 @@
+{
+	"variables": {
+		"authrized_faces_num": 1,
+		"open_hand_limit": 2,
+		"ratio_limit": 2.15,
+		"flash_rate": 0.0,
+		"rate_increment": 0.06,
+		"max_num_hands": 8,
+		"flash_color": 255,
+		"screen_res": [4096, 2160],
+		"frame_res": [1920, 1080],
+		"window_name": "NEXT50 Executive Day"
+	}
+}

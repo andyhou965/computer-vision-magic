@@ -1,6 +1,7 @@
 import glob
 import os
 import cv2
+import json
 
 
 def get_autherized_names(path):
@@ -61,3 +62,8 @@ def transparent(frame, targetImg, x, y, size=None):
     newFrame[y : y + h, x : x + w] = cv2.add(img1_bg, img2_fg)
 
     return newFrame
+
+
+def read_json(file_path):
+    with open(file_path, "r") as f:
+        return json.load(f)
