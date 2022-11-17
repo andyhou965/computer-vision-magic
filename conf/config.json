@@ -20,7 +20,7 @@
 	},
 
 	"videos": {
-		"video_path": "videos/Platform50_launch_video.mp4",
+		"video_path": "videos/Platform_launch_video.mp4",
 		"video_window_title": "Video Window",
 		"have_video_control": false
 	}
