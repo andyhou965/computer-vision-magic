@@ -16,7 +16,7 @@
 	"images": {
 		"shield_inside_image": "images/magic_circle_inside.png",
 		"shield_outside_image": "images/magic_circle_outside.png",
-		"shield_size": 3.0
+		"shield_size": 4.0
 	},
 
 	"videos": {
