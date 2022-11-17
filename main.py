@@ -2,8 +2,10 @@ import cv2
 import mediapipe as mp
 from simple_facerec import SimpleFacerec
 import os
-from play_video import *
+import play_video
+import play_video2
 from utils import *
+import sys
 
 absolute_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -18,6 +20,10 @@ flash_rate = config_file["variables"]["flash_rate"]
 rate_increment = config_file["variables"]["rate_increment"]
 flash_color = config_file["variables"]["flash_color"]
 max_num_hands = config_file["variables"]["max_num_hands"]
+
+# Info board
+info_board_size_rate = config_file["variables"]["info_board_size_rate"]
+info_board_bias_rate = config_file["variables"]["info_board_bias_rate"]
 
 ## Window Name
 window_name = config_file["variables"]["window_name"]
@@ -92,15 +98,19 @@ while video.isOpened():
         name_card = os.path.join(absolute_path, "name-cards/%s.png" % (name))
         name_board = cv2.imread(name_card, -1)
         height, width = name_board.shape[0], name_board.shape[1]
-        board_size = (width // 2, height // 2)
+        board_size = (
+            int(width * info_board_size_rate),
+            int(height * info_board_size_rate),
+        )
         name_board = cv2.resize(name_board, board_size)
         try:
             y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
             # cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
             # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
-            bias = (x2 - x1) // 8
-            frame_row = y1
-            frame_col = x1 - bias
+            bias_x = int((x2 - x1) * info_board_bias_rate)
+            bias_y = int((y2 - y1) * info_board_bias_rate)
+            frame_row = y1 - bias_y
+            frame_col = x1 - bias_x
 
             # make the name board transparent
             b, g, r, a = cv2.split(name_board)
@@ -108,8 +118,8 @@ while video.isOpened():
             mask = cv2.medianBlur(a, 1)
             h, w, _ = overlay_color.shape
             roi = frame[
-                frame_row : frame_row + board_size[1],
-                frame_col - board_size[0] : frame_col,
+                frame_row - board_size[1] : frame_row,
+                frame_col - board_size[0] // 2 : frame_col + board_size[0] // 2,
             ]
 
             img1_bg = cv2.bitwise_and(
@@ -118,8 +128,8 @@ while video.isOpened():
             img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
 
             frame[
-                frame_row : frame_row + board_size[1],
-                frame_col - board_size[0] : frame_col,
+                frame_row - board_size[1] : frame_row,
+                frame_col - board_size[0] // 2 : frame_col + board_size[0] // 2,
             ] = cv2.add(img1_bg, img2_fg)
 
         except:
@@ -211,7 +221,15 @@ while video.isOpened():
 video.release()
 cv2.destroyAllWindows()
 
-app = QApplication(sys.argv)
-window = Window()
+
+######## Play Video ########
+have_video_window = config_file["video"]["have_video_window"]
+
+if have_video_window:
+    app = play_video2.QApplication(sys.argv)
+    window = play_video2.Window()
+else:
+    app = play_video.QApplication(sys.argv)
+    window = play_video.Window()
 window.show()
 sys.exit(app.exec_())
