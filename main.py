@@ -58,17 +58,23 @@ window_height = int(frame_height * scale)
 cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
 cv2.resizeWindow(window_name, window_width, window_height)
 
-######## Load the images ########
+######## Load the Images ########
+# Shield related
+shield_size = config_file["images"]["shield_size"]
+shield_inside_image = config_file["images"]["shield_inside_image"]
+shield_outside_image = config_file["images"]["shield_outside_image"]
+
+img_outside = cv2.imread(os.path.join(absolute_path, shield_outside_image), -1)
+img_inside = cv2.imread(os.path.join(absolute_path, shield_inside_image), -1)
+
+deg = 0
+
 # Encode faces from a folder
 known_faces_folder = os.path.join(absolute_path, "known-faces/")
 name_list = get_autherized_names(known_faces_folder)
 sfr = SimpleFacerec()
 sfr.load_encoding_images(known_faces_folder)
 
-img_1 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_outside.png'), -1)
-img_2 = cv2.imread(os.path.join(absolute_path, 'images/magic_circle_inside.png'), -1)
-
-deg = 0
 
 # Detect the hands
 mpHands = mp.solutions.hands
@@ -171,7 +177,6 @@ while video.isOpened():
                 open_hand_num += 1
                 centerx = midle_mcp[0]
                 centery = midle_mcp[1]
-                shield_size = 3.0
                 diameter = round(palm * shield_size)
                 x1 = round(centerx - (diameter / 2))
                 y1 = round(centery - (diameter / 2))
@@ -193,12 +198,12 @@ while video.isOpened():
                 deg = deg + ang_vel
                 if deg > 360:
                     deg = 0
-                hei, wid, col = img_1.shape
+                hei, wid, col = img_outside.shape
                 cen = (wid // 2, hei // 2)
                 M1 = cv2.getRotationMatrix2D(cen, round(deg), 1.0)
                 M2 = cv2.getRotationMatrix2D(cen, round(360 - deg), 1.0)
-                rotated1 = cv2.warpAffine(img_1, M1, (wid, hei))
-                rotated2 = cv2.warpAffine(img_2, M2, (wid, hei))
+                rotated1 = cv2.warpAffine(img_outside, M1, (wid, hei))
+                rotated2 = cv2.warpAffine(img_inside, M2, (wid, hei))
                 if diameter != 0:
                     frame = transparent(frame, rotated1, x1, y1, shield_size)
                     frame = transparent(frame, rotated2, x1, y1, shield_size)
@@ -221,15 +226,16 @@ while video.isOpened():
 video.release()
 cv2.destroyAllWindows()
 
-
 ######## Play Video ########
-have_video_window = config_file["video"]["have_video_window"]
+video_path = config_file["videos"]["video_path"]
+have_video_control = config_file["videos"]["have_video_control"]
+video_window_title = config_file["videos"]["video_window_title"]
 
-if have_video_window:
+if have_video_control:
     app = play_video2.QApplication(sys.argv)
-    window = play_video2.Window()
+    window = play_video2.Window(video_path=video_path, window_title=video_window_title)
 else:
     app = play_video.QApplication(sys.argv)
-    window = play_video.Window()
+    window = play_video.Window(video_path=video_path, window_title=video_window_title)
 window.show()
 sys.exit(app.exec_())

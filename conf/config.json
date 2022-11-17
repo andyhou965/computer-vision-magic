@@ -13,8 +13,15 @@
 		"camera": 0,
 		"window_name": "AR Window"
 	},
+	"images": {
+		"shield_inside_image": "images/magic_circle_inside.png",
+		"shield_outside_image": "images/magic_circle_outside.png",
+		"shield_size": 3.0
+	},
 
-	"video": {
-		"have_video_window": true
+	"videos": {
+		"video_path": "videos/launch_video.mp4",
+		"video_window_title": "Video Window",
+		"have_video_control": false
 	}
 }

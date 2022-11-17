@@ -14,17 +14,13 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtCore import Qt, QUrl
-import os
-
-absolute_path = os.path.dirname(os.path.abspath(__file__))
-video_path = os.path.join(absolute_path, "videos/launch_video.mp4")
 
 
 class Window(QWidget):
-    def __init__(self):
+    def __init__(self, video_path, window_title=""):
         super().__init__()
-
-        self.setWindowTitle("Platform50 Launch")
+        self.video_path = video_path
+        self.setWindowTitle(window_title)
         # self.setGeometry(350, 100, 700, 500)
         # self.showMaximized()
         self.showFullScreen()
@@ -40,7 +36,7 @@ class Window(QWidget):
 
         # create videowidget object
         videowidget = QVideoWidget()
-        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(video_path)))
+        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(self.video_path)))
 
         # create button for playing
         self.playBtn = QPushButton()
