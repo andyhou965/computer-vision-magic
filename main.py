@@ -115,7 +115,7 @@ while video.isOpened():
             # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
             bias_x = int((x2 - x1) * info_board_bias_rate)
             bias_y = int((y2 - y1) * info_board_bias_rate)
-            frame_row = y1 - bias_y
+            frame_row = y1
             frame_col = x1 - bias_x
 
             # make the name board transparent
@@ -124,8 +124,8 @@ while video.isOpened():
             mask = cv2.medianBlur(a, 1)
             h, w, _ = overlay_color.shape
             roi = frame[
-                frame_row - board_size[1] : frame_row,
-                frame_col - board_size[0] // 2 : frame_col + board_size[0] // 2,
+                frame_row : frame_row + board_size[1],
+                frame_col - board_size[0] : frame_col,
             ]
 
             img1_bg = cv2.bitwise_and(
@@ -134,8 +134,8 @@ while video.isOpened():
             img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
 
             frame[
-                frame_row - board_size[1] : frame_row,
-                frame_col - board_size[0] // 2 : frame_col + board_size[0] // 2,
+                frame_row : frame_row + board_size[1],
+                frame_col - board_size[0] : frame_col,
             ] = cv2.add(img1_bg, img2_fg)
 
         except:

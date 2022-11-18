@@ -8,8 +8,8 @@
 		"max_num_hands": 8,
 		"flash_color": 0,
 		"screen_res": [4096, 2160],
-		"info_board_size_rate": 0.6,
-		"info_board_bias_rate": 0.25,
+		"info_board_size_rate": 0.4,
+		"info_board_bias_rate": 0.125,
 		"camera": 0,
 		"window_name": "AR Window"
 	},
