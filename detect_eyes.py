@@ -28,8 +28,8 @@ video = cv2.VideoCapture(0)
 
 face_cover_img = cv2.imread(os.path.join(absolute_path, "images/tech_eye.png"), -1)
 height, width = face_cover_img.shape[0], face_cover_img.shape[1]
-
-info_board_size_rate = 0.6
+print(height, width)
+info_board_size_rate = 0.5
 board_size = (
     int(width * info_board_size_rate),
     int(height * info_board_size_rate),
@@ -59,24 +59,35 @@ while video.isOpened():
             landmarks = fr.face_landmarks(face_area)
             if landmarks:
                 right_eye = landmarks[0]["right_eye"]
-                eye_point_locations = [(x1 + x, y1 + y) for x, y in right_eye]
+                right_eye_point_locations = [(x1 + x, y1 + y) for x, y in right_eye]
 
-                x = [p[0] for p in eye_point_locations]
-                y = [p[1] for p in eye_point_locations]
+                x = [p[0] for p in right_eye_point_locations]
+                y = [p[1] for p in right_eye_point_locations]
 
-                eye_centroid = (
-                    sum(x) // len(eye_point_locations),
-                    sum(y) // len(eye_point_locations),
+                right_eye_x, right_eye_y = (
+                    sum(x) // len(right_eye_point_locations),
+                    sum(y) // len(right_eye_point_locations),
                 )
 
-                eye_x = eye_centroid[0]
-                eye_y = eye_centroid[1]
+                left_eye = landmarks[0]["left_eye"]
+                left_eye_point_locations = [(x1 + x, y1 + y) for x, y in left_eye]
+
+                x = [p[0] for p in left_eye_point_locations]
+                y = [p[1] for p in left_eye_point_locations]
+
+                left_eye_x, left_eye_y = (
+                    sum(x) // len(left_eye_point_locations),
+                    sum(y) // len(left_eye_point_locations),
+                )
+
+                eye_x, eye_y = (left_eye_x + right_eye_x) // 2, (left_eye_y + right_eye_y) // 2 
+
 
                 img_height, img_weight, _ = face_cover_img.shape
 
                 roi = frame[
-                    eye_y - img_height // 2 : eye_y + img_height // 2,
-                    eye_x - img_weight // 2 : eye_x + img_weight // 2,
+                    right_eye_y - img_height // 2 : right_eye_y + img_height // 2,
+                    right_eye_x - img_weight // 2 : right_eye_x + img_weight // 2,
                 ]
 
                 # cover = cv2.resize(face_cover_img, (img_height // 2, img_weight // 2))
@@ -92,8 +103,8 @@ while video.isOpened():
                 img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
 
                 frame[
-                    eye_y - img_height // 2 : eye_y + img_height // 2,
-                    eye_x - img_weight // 2 : eye_x + img_weight // 2,
+                    right_eye_y - img_height // 2 : right_eye_y + img_height // 2,
+                    right_eye_x - img_weight // 2 : right_eye_x + img_weight // 2,
                 ] = cv2.add(img1_bg, img2_fg)
         except:
             continue
