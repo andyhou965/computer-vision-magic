@@ -26,10 +26,10 @@ sfr.load_encoding_images(known_faces_folder)
 
 video = cv2.VideoCapture(0)
 
-face_cover_img = cv2.imread(os.path.join(absolute_path, "images/tech_eye.png"), -1)
+face_cover_img = cv2.imread(os.path.join(absolute_path, "images/control_panel01.png"), -1)
 height, width = face_cover_img.shape[0], face_cover_img.shape[1]
 print(height, width)
-info_board_size_rate = 0.5
+info_board_size_rate = 0.7
 board_size = (
     int(width * info_board_size_rate),
     int(height * info_board_size_rate),
@@ -86,8 +86,8 @@ while video.isOpened():
                 img_height, img_weight, _ = face_cover_img.shape
 
                 roi = frame[
-                    right_eye_y - img_height // 2 : right_eye_y + img_height // 2,
-                    right_eye_x - img_weight // 2 : right_eye_x + img_weight // 2,
+                    eye_y - img_height // 2 : eye_y + img_height // 2,
+                    eye_x - img_weight // 2 : eye_x + img_weight // 2,
                 ]
 
                 # cover = cv2.resize(face_cover_img, (img_height // 2, img_weight // 2))
@@ -103,8 +103,8 @@ while video.isOpened():
                 img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
 
                 frame[
-                    right_eye_y - img_height // 2 : right_eye_y + img_height // 2,
-                    right_eye_x - img_weight // 2 : right_eye_x + img_weight // 2,
+                    eye_y - img_height // 2 : eye_y + img_height // 2,
+                    eye_x - img_weight // 2 : eye_x + img_weight // 2,
                 ] = cv2.add(img1_bg, img2_fg)
         except:
             continue
