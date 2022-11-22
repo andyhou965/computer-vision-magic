@@ -23,7 +23,8 @@ max_num_hands = config_file["variables"]["max_num_hands"]
 
 # Info board
 info_board_size_rate = config_file["variables"]["info_board_size_rate"]
-info_board_bias_rate = config_file["variables"]["info_board_bias_rate"]
+bias_x = config_file["variables"]["info_board_bias_x"]
+bias_y = config_file["variables"]["info_board_bias_y"]
 
 ## Window Name
 window_name = config_file["variables"]["window_name"]
@@ -113,19 +114,26 @@ while video.isOpened():
             y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
             # cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
             # cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
-            bias_x = int((x2 - x1) * info_board_bias_rate)
-            bias_y = int((y2 - y1) * info_board_bias_rate)
-            frame_row = y1
+
+            frame_row = y1 - bias_y
             frame_col = x1 - bias_x
+
+            frame_row_index = [frame_row, frame_row + board_size[1]]
+            if (frame_col - board_size[0]) > 0:
+                frame_col_index = [frame_col - board_size[0], frame_col]
+            else:
+                frame_col = x2 + bias_x
+                frame_col_index = [frame_col, frame_col + board_size[0]]
 
             # make the name board transparent
             b, g, r, a = cv2.split(name_board)
             overlay_color = cv2.merge((b, g, r))
             mask = cv2.medianBlur(a, 1)
             h, w, _ = overlay_color.shape
+
             roi = frame[
-                frame_row : frame_row + board_size[1],
-                frame_col - board_size[0] : frame_col,
+                frame_row_index[0] : frame_row_index[1],
+                frame_col_index[0] : frame_col_index[1],
             ]
 
             img1_bg = cv2.bitwise_and(
@@ -134,8 +142,8 @@ while video.isOpened():
             img2_fg = cv2.bitwise_and(overlay_color, overlay_color, mask=mask)
 
             frame[
-                frame_row : frame_row + board_size[1],
-                frame_col - board_size[0] : frame_col,
+                frame_row_index[0] : frame_row_index[1],
+                frame_col_index[0] : frame_col_index[1],
             ] = cv2.add(img1_bg, img2_fg)
 
         except:
