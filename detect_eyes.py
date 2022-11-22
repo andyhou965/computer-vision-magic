@@ -26,10 +26,12 @@ sfr.load_encoding_images(known_faces_folder)
 
 video = cv2.VideoCapture(0)
 
-face_cover_img = cv2.imread(os.path.join(absolute_path, "images/control_panel01.png"), -1)
+face_cover_img = cv2.imread(
+    os.path.join(absolute_path, "images/control_panel01.png"), -1
+)
 height, width = face_cover_img.shape[0], face_cover_img.shape[1]
 print(height, width)
-info_board_size_rate = 0.7
+info_board_size_rate = 0.4
 board_size = (
     int(width * info_board_size_rate),
     int(height * info_board_size_rate),
@@ -80,8 +82,9 @@ while video.isOpened():
                     sum(y) // len(left_eye_point_locations),
                 )
 
-                eye_x, eye_y = (left_eye_x + right_eye_x) // 2, (left_eye_y + right_eye_y) // 2 
-
+                eye_x, eye_y = (left_eye_x + right_eye_x) // 2, (
+                    left_eye_y + right_eye_y
+                ) // 2
 
                 img_height, img_weight, _ = face_cover_img.shape
 
